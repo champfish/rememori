@@ -13,14 +13,20 @@ function getSaved(callback){
 function postSaved(save){
 	console.log('post saved');
 	getSaved(function(saved){
+		console.log(22222);
+		console.log(saved);
 		saved.push(save);
+		console.log(33333);
+		console.log(saved);
 		chrome.storage.local.set({'vic':saved}, function(){
+			console.log('saved!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
 		});
 	});
 }
 
 document.onkeypress = KeyPress;
 
+console.log('neggi');
 getGoogleSearch();
 function getGoogleSearch(){
 	var bar = document.getElementById("lst-ib");
@@ -32,6 +38,7 @@ function getGoogleSearch(){
 
 function inject(search){
 	getClosestMatch(search,function(save){
+		console.log(save);
 		var url = save.url;
 		var title = save.title;
 		var text = "Rememori Link";
@@ -42,6 +49,8 @@ function inject(search){
 function getClosestMatch(search, callback){
 	console.log('CLOSEEST MATCH');
 	getSaved(function(saved){
+		console.log(saved);
+		//callback(saved[0]); //delete
 		for(i = 0; i< saved.length; i++){
 			if(saved[i].title==search){
 				callback(saved[i]);

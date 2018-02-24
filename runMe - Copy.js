@@ -1,11 +1,20 @@
 function getSaved(callback){
-	chrome.storage.local.get({'vic': [{url:'http://howtogeek.com',title:'HowToGeek'}]}, function(saved){
+	chrome.storage.local.get('q', function(saved){
 		console.log('direct output');
-		console.log(saved.vic);
-		if(true){
+		if((typeof saved)=="string"){
+			console.log(saved);
+			var toReturn = [];
+			var list= saved.split('!!!@@@');
+			for(i=0; i< list.length; i=i+2){
+				var s = {url:list[i], title:list[1]};
+			}
 			console.log('GET SAVED');
-			console.log(saved.vic);
-			callback(saved.vic);
+			console.log(toReturn);
+			callback(toReturn);
+		} else {
+			console.log('nullsaved');
+			var toReturn = [];
+			callback(toReturn);
 		}
 	});
 }
@@ -13,14 +22,25 @@ function getSaved(callback){
 function postSaved(save){
 	console.log('post saved');
 	getSaved(function(saved){
+		var myJSON = "";
+		console.log(22222);
+		console.log(saved);
 		saved.push(save);
-		chrome.storage.local.set({'vic':saved}, function(){
+		var myJSON = "";
+		for(i=0; i<saved; i++){
+			myJSON = myJSON + '!!!@@@' + saved[i].url + '!!!@@@' + saved[i].title;
+		}
+		console.log('direct input');
+		console.log(myJSON);
+		chrome.storage.local.set({'q':myJSON}, function(){
+			console.log('saved!');
 		});
 	});
 }
 
 document.onkeypress = KeyPress;
 
+console.log('neggi');
 getGoogleSearch();
 function getGoogleSearch(){
 	var bar = document.getElementById("lst-ib");
@@ -32,6 +52,7 @@ function getGoogleSearch(){
 
 function inject(search){
 	getClosestMatch(search,function(save){
+		console.log(save);
 		var url = save.url;
 		var title = save.title;
 		var text = "Rememori Link";
@@ -42,6 +63,8 @@ function inject(search){
 function getClosestMatch(search, callback){
 	console.log('CLOSEEST MATCH');
 	getSaved(function(saved){
+		console.log(saved);
+		callback(saved[0]); //delete
 		for(i = 0; i< saved.length; i++){
 			if(saved[i].title==search){
 				callback(saved[i]);

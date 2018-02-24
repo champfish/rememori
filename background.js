@@ -9,10 +9,12 @@ function injectionScript(tabId, info, tab){
 	if (info.status === 'complete'){
 		console.log('hesdfy');
 		chrome.tabs.executeScript(tabId, {
-			file: "runMe.js",
+			file: "jquery-3.3.1.min.js",
 			runAt: "document_end"
 		}, function(){
-			console.log('end of document');
+			chrome.tabs.executeScript({
+				file: "runMe.js"
+			});
 		});
 	}
 }
