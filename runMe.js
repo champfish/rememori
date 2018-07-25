@@ -22,43 +22,88 @@ function postSaved(save){
 document.onkeypress = KeyPress;
 
 getGoogleSearch();
+getBingSearch();
 function getGoogleSearch(){
 	var bar = document.getElementById("lst-ib");
 	if(bar!=null){
 		var value = bar.value;
-		inject(value);
+		inject(value,'google');
 	}
 }
 
-function inject(search){
+function getBingSearch(){
+	var bar = document.getElementById("sb_form_q");
+	if(bar!=null){
+		var value = bar.value;
+		inject(value,'bing');
+	}
+}
+
+function inject(search, site){
 	getClosestMatch(search,function(save){
 		var url = save.url;
 		var title = save.title;
 		var text = "Rememori Link";
-		injectGoogle(url, title, text);
+		switch(site){
+			case "google":
+			injectGoogle(url,title,text);
+			break;
+			case "bing":
+			injectBing(url,title,text);
+			break;
+		}
 	});
 }
 
 function getClosestMatch(search, callback){
-	console.log('CLOSEEST MATCH');
+	search = search.toLowerCase();
+
+	var bestMatch = '';
+	var bestScore = -1;
 	getSaved(function(saved){
 		for(i = 0; i< saved.length; i++){
-			if(saved[i].title==search){
-				callback(saved[i]);
+			var matchingScore = matchingScore(search, saved[i].title.toLowerCase);
+			if(matchingScore>bestScore){
+				bestScore = matchingScore;
+				bestMatch = saved[i];
 			}
 		}	
+		if(bestScore>1){
+			callback(bestMatch);
+		}
 	});
+}
+
+function matchingScore(search,saved){
+	var wordArr = saved.split(" ");
+	var matchingCount = 0;
+	for(var i = 0; i< wordArr.length; i++){
+		if(search.contains(wordArr[i])){
+			matchingCount++;
+		}
+	}
+	if(matchingCount>wordArr.length/2){
+		return matchingCount;
+	}else{
+		return -1;
+	}
+}
+
+function injectBing(url, title, text){
+	var b_results = document.getElementById("b_results");
+	var b_algo = b_results.firstChild;
+	var htmlCode = getBingCode(url,title,text);
+	var htmlElement = htmlToElement(htmlCode);
+	b_results.insertBefore(htmlElement, b_results.firstChild);
 }
 
 function injectGoogle(url, title, text){
 	var rso = document.getElementById("rso");
 	var srg = rso.firstChild.firstChild;
-	var htmlCode = getCode(url,title,text);
+	var htmlCode = getGoogleCode(url,title,text);
 	var htmlElement = htmlToElement(htmlCode);
 	srg.insertBefore(htmlElement, srg.firstChild);
 }
-
-
 
 
 function save(url, title){
@@ -92,7 +137,7 @@ function KeyPress(e){
      }
 }
 
-function getCode(url, title, text){
+function getGoogleCode(url, title, text){ 
 	var item = '<div class="g"><!--m--><div data-hveid="40" data-ved="0ahUKEwifjqrb4q3ZAhUF04MKHWJUDBkQFQgoKAAwAA"><div class="rc"><h3 class="r">'+
 	'<a href="'+
 	url+
@@ -106,6 +151,15 @@ function getCode(url, title, text){
 	'</div><span class="st">'+
 	text +
 	'</span></div></div></div></div><!--n--></div>'
+	return item;
+}
+
+function getBingCode(url, title, text){ 
+	var item = '<li class="b_algo" data-bm="6"><h2><a href="'+url+
+	'"><strong>'+title+
+	'</strong></a></h2><div class="b_caption"><div class="b_attribution"><cite>'+url+
+	'</cite></div><p>'+text+
+	'</p></div></li>';
 	return item;
 }
 
